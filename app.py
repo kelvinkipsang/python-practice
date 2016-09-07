@@ -1,10 +1,13 @@
-from flask import Flask, render_template,request,url_for,redirect
+from flask import Flask, render_template,request,redirect,session,url_for,flash
+from functools import wraps
 
 app = Flask(__name__)
 
+app.secret_key = "secret key"
+
 @app.route('/')
 def index():
-    return "nothing here"
+    return render_template("index.html")
 
 @app.route('/welcome')
 def welcome():
@@ -17,8 +20,17 @@ def login():
         if request.form['username'] != 'admin' or request.form['password'] != 'admin' :
             error = 'Invalid credentials. Please enter correct details'
         else:
-            return (redirect(url_for('home')))
+            session['logged in'] = True
+            flash("you logged in")
+            return redirect('/')
     return render_template('login.html',error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged in', None)
+    flash("you logged out")
+    return redirect(url_for('welcome'))
+
 
 if __name__== '__main__':
     app.run(debug=True)
