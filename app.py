@@ -5,27 +5,40 @@ app = Flask(__name__)
 
 app.secret_key = "secret key"
 
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Log in first')
+            return redirect(url_for('login'))
+    return wrap
 @app.route('/')
-def index():
+@login_required
+def home():
     return render_template("index.html")
 
 @app.route('/welcome')
+@login_required
 def welcome():
     return render_template("welcome.html")
 
 @app.route('/login',methods = ['GET','POST'])
 def login():
     error = None
-    if request.method=='POST':
+    if request.method =='POST':
         if request.form['username'] != 'admin' or request.form['password'] != 'admin' :
             error = 'Invalid credentials. Please enter correct details'
         else:
             session['logged in'] = True
             flash("you logged in")
-            return redirect('/')
+            return redirect(url_for('home'))
     return render_template('login.html',error=error)
 
 @app.route('/logout')
+@login_required
 def logout():
     session.pop('logged in', None)
     flash("you logged out")
