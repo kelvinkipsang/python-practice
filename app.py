@@ -3,25 +3,14 @@ from functools import wraps
 
 app = Flask(__name__)
 
-app.secret_key = "secret key"
+app.secret_key = "secret key"  #encryption key to access session data on server side
 
 
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Log in first')
-            return redirect(url_for('login'))
-    return wrap
 @app.route('/')
-@login_required
 def home():
     return render_template("index.html")
 
 @app.route('/welcome')
-@login_required
 def welcome():
     return render_template("welcome.html")
 
@@ -38,12 +27,11 @@ def login():
     return render_template('login.html',error=error)
 
 @app.route('/logout')
-@login_required
 def logout():
-    session.pop('logged in', None)
+    session.pop('logged in', None) #pop out true replacing it with None
     flash("you logged out")
-    return redirect(url_for('welcome'))
+    return redirect(url_for('login')) #redirect to login page
 
 
-if __name__== '__main__':
+if __name__ == '__main__':
     app.run(debug=True)
