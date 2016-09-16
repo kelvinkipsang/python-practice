@@ -1,9 +1,11 @@
-from flask import Flask, render_template,request,redirect,session,url_for,flash
+from flask import Flask, render_template,request,redirect,session,url_for,flash, g
 from functools import wraps
+import sqlite3
+
 
 app = Flask(__name__)
-
 app.secret_key = "im batman"  #encryption key to access session data on server side
+app.database = "sample.db"    #assigning our db
 
 
 def login_required(f):
@@ -20,10 +22,15 @@ def login_required(f):
 @app.route('/')
 @login_required
 def home():
-    return render_template("index.html")
+                                                                                    #g is a object specific to flask that stores temporary object during a request like db connection or currently logged in user
+                                                                                    #value of g is reset after each request
+    g.db = connect_db()                                                             #establish connection using the g object
+    cur = g.db.execute('select * from posts')                                       #query db/ fetch data
+    posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()]      #add data to dictionary
+    g.db.close()                                                                    #close db
+    return render_template("index.html", posts = posts)             #pass posts data fetched from db
 
 @app.route('/welcome')
-
 def welcome():
     return render_template("welcome.html")
 
@@ -47,6 +54,11 @@ def logout():
     session.pop('logged in', None) #pop out true replacing it with None
     flash("you logged out")
     return redirect(url_for('welcome')) #redirect to login page
+
+# funtion that creates a db object that interacts with our db or
+# in simple terms connect to our db
+def connect_db():
+    return sqlite3.connect(app.database)
 
 
 if __name__ == '__main__':
