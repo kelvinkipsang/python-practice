@@ -25,8 +25,9 @@ def home():
                                                                                     #g is a object specific to flask that stores temporary object during a request like db connection or currently logged in user
                                                                                     #value of g is reset after each request
     g.db = connect_db()                                                             #establish connection using the g object
-    cur = g.db.execute('select * from posts')                                       #query db/ fetch data
-    posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()]      #add data to dictionary
+    cur = g.db.execute('select * from posts')
+                                                                                    #query db/ fetch data
+    posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()]      #add data to dictionary-fetchall return a list of tuples of each row
     g.db.close()                                                                    #close db
     return render_template("index.html", posts = posts)             #pass posts data fetched from db
 
