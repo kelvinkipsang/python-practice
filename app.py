@@ -1,11 +1,14 @@
 from flask import Flask, render_template,request,redirect,session,url_for,flash, g
 from functools import wraps
 import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 app.secret_key = "im batman"  #encryption key to access session data on server side
-app.database = "sample.db"    #assigning our db
+
+db=SQLAlchemy(app
 
 
 def login_required(f):
@@ -58,8 +61,8 @@ def logout():
 
 # funtion that creates a db object that interacts with our db or
 # in simple terms connect to our db
-def connect_db():
-    return sqlite3.connect(app.database)
+#def connect_db():
+ #   return sqlite3.connect(app.database)
 
 
 if __name__ == '__main__':

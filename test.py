@@ -29,6 +29,18 @@ class FlaskTestCase(unittest.TestCase):
                                    follow_redirects=True)  # using unittest lib to call login route
         self.assertIn(b'Invalid credentials. Please enter correct details', response.data)
 
+    #login required
+    def test_login_required(self):
+        tester = app.test_client(self)
+        response = tester.get('/', follow_redirects=True)
+        self.assertTrue(b'Log in first' in response.data)
+
+    #posts in main page
+    def test_post(self):
+        tester = app.test_client(self)
+        response = tester.post('/login', data=dict(username="admin", password="admin"),
+                               follow_redirects=True)  # using unittest lib to call login route
+        self.assertIn('post: a quiet guy', response.data)
 
 
 if __name__== '__main__':
