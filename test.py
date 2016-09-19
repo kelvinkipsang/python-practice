@@ -40,7 +40,7 @@ class FlaskTestCase(unittest.TestCase):
         tester = app.test_client(self)
         response = tester.post('/login', data=dict(username="admin", password="admin"),
                                follow_redirects=True)  # using unittest lib to call login route
-        self.assertIn('post: a quiet guy', response.data)
+        self.assertIn('post: looking', response.data)
 
 
 if __name__== '__main__':

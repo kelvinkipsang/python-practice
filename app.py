@@ -36,6 +36,7 @@ def home():
     #     for row in cur.fetchall():
     #         posts.append(dict(title=row[0], description=row[1]) )
     #     g.db.close()
+    #  object that ensures it is only valid for the active request and that will return different values for each request
     # except sqlite3.OperationalError:
     #     flash("you shall not pass(db not there)")
     posts = db.session.query(BlogPost).all()
