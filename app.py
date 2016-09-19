@@ -1,7 +1,7 @@
-from flask import Flask, render_template,request,redirect,session,url_for,flash, g
+from flask import Flask, render_template,request,redirect,session,url_for,flash
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-import sqlite3
+# import sqlite3
 
 
 
@@ -12,6 +12,7 @@ app.secret_key = "im batman"  #encryption key to access session data on server s
 
 db=SQLAlchemy(app)
 
+from models import * #importing b4 init the db would render it useless
 
 def login_required(f):
     @wraps(f)
@@ -27,16 +28,17 @@ def login_required(f):
 @app.route('/')
 @login_required
 def home():
-    posts=[]
-    try:                     #g is a object specific to flask that stores temporary object during a request like db connection or currently logged in user
-        g.db = connect_db()  # establish connection using the g object
-        cur = g.db.execute('select * from posts') #value of g is reset after each request# query db/ fetch data
-
-        for row in cur.fetchall():
-            posts.append(dict(title=row[0], description=row[1]) )
-        g.db.close()
-    except sqlite3.OperationalError:
-        flash("you shall not pass(db not there)")
+    # posts=[]
+    # try:                     #g is a object specific to flask that stores temporary object during a request like db connection or currently logged in user
+    #     g.db = connect_db()  # establish connection using the g object
+    #     cur = g.db.execute('select * from posts') #value of g is reset after each request# query db/ fetch data
+    #
+    #     for row in cur.fetchall():
+    #         posts.append(dict(title=row[0], description=row[1]) )
+    #     g.db.close()
+    # except sqlite3.OperationalError:
+    #     flash("you shall not pass(db not there)")
+    posts = db.session.query(BlogPost).all()
     return render_template("index.html", posts=posts)
 
 
@@ -71,8 +73,8 @@ def logout():
 
 # funtion that creates a db object that interacts with our db or
 # in simple terms connect to our db
-def connect_db():
-    return sqlite3.connect(app.database)
+# def connect_db():
+    # return sqlite3.connect(app.database)
 
 
 if __name__ == '__main__':
