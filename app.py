@@ -1,14 +1,16 @@
 from flask import Flask, render_template,request,redirect,session,url_for,flash, g
+from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 import sqlite3
-from flask_sqlalchemy import SQLAlchemy
+
+
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db' #database directory
 app.secret_key = "im batman"  #encryption key to access session data on server side
 
-db=SQLAlchemy(app
+db=SQLAlchemy(app)
 
 
 def login_required(f):
@@ -25,14 +27,22 @@ def login_required(f):
 @app.route('/')
 @login_required
 def home():
-                                                                                    #g is a object specific to flask that stores temporary object during a request like db connection or currently logged in user
-                                                                                    #value of g is reset after each request
-    g.db = connect_db()                                                             #establish connection using the g object
-    cur = g.db.execute('select * from posts')
-                                                                                    #query db/ fetch data
-    posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()]      #add data to dictionary-fetchall return a list of tuples of each row
-    g.db.close()                                                                    #close db
-    return render_template("index.html", posts = posts)             #pass posts data fetched from db
+    posts=[]
+    try:                     #g is a object specific to flask that stores temporary object during a request like db connection or currently logged in user
+        g.db = connect_db()  # establish connection using the g object
+        cur = g.db.execute('select * from posts') #value of g is reset after each request# query db/ fetch data
+
+        for row in cur.fetchall():
+            posts.append(dict(title=row[0], description=row[1]) )
+        g.db.close()
+    except sqlite3.OperationalError:
+        flash("you shall not pass(db not there)")
+    return render_template("index.html", posts=posts)
+
+
+   # posts = [dict(title=row[0], description=row[1]) for row in cur.fetchall()]      #add data to dictionary-fetchall return a list of tuples of each row
+   # g.db.close()                                                                    #close db
+    #return render_template("index.html", posts = posts)             #pass posts data fetched from db
 
 @app.route('/welcome')
 def welcome():
@@ -50,7 +60,7 @@ def login():
             session['logged in'] = True
             flash("you logged in")
             return redirect(url_for('home'))
-    return render_template('login.html',error=error)
+    return render_template('login.html', error=error)
 
 @app.route('/logout')
 @login_required
@@ -61,8 +71,8 @@ def logout():
 
 # funtion that creates a db object that interacts with our db or
 # in simple terms connect to our db
-#def connect_db():
- #   return sqlite3.connect(app.database)
+def connect_db():
+    return sqlite3.connect(app.database)
 
 
 if __name__ == '__main__':
